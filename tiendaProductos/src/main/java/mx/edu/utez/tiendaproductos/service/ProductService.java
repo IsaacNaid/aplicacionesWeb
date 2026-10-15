@@ -1,7 +1,9 @@
 package mx.edu.utez.tiendaproductos.service;
 
 
+import mx.edu.utez.tiendaproductos.model.Category;
 import mx.edu.utez.tiendaproductos.model.Product;
+import mx.edu.utez.tiendaproductos.repository.CategoryRepository;
 import mx.edu.utez.tiendaproductos.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 
@@ -10,9 +12,11 @@ import java.util.Optional;
 
 @Service
 public class ProductService {
-    private ProductRepository repo;
-    public ProductService(ProductRepository repo){
+    private final ProductRepository repo;
+    private final CategoryRepository repoCategory;
+    public ProductService(ProductRepository repo ,  CategoryRepository repoCategory){
         this.repo = repo;
+        this.repoCategory= repoCategory;
     }
 
     public List<Product> getAll(){
@@ -23,8 +27,11 @@ public class ProductService {
         return repo.findById(id);
     }
 
-    public Product save(Product product){
+    public Product save(Product product,long categoryId){
+        Category category = repoCategory.findById(categoryId).orElseThrow();
+        product.setCategory(category);
         return repo.save(product);
+
     }
 
     public Optional<Product> update(long id, Product product){

@@ -1,9 +1,6 @@
 package mx.edu.utez.tiendaproductos.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -25,4 +22,7 @@ public class Product {
 
     private Double price;
 
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
 }

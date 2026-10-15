@@ -45,7 +45,7 @@ public class ProductController {
         if (product.name().isEmpty()){
              ResponseEntity.badRequest().body("no puede ser asi");
         }
-        Product productSaved=service.save(toEntity(product));
+        Product productSaved=service.save(toEntity(product),product.categoryId());
         return ResponseEntity.status(HttpStatus.CREATED).body(toResponse(productSaved));
 
     }
@@ -69,8 +69,15 @@ public class ProductController {
 
     }
 
-    private ProductResponse toResponse(Product product){
-        return new ProductResponse(product.getId(),product.getName(),product.getPrice(),product.getStock());
+    private ProductResponse toResponse(Product product) {
+        return new ProductResponse(
+                product.getId(),
+                product.getName(),
+                product.getPrice(),
+                product.getStock(),
+                product.getCategory().getId(),
+                product.getCategory().getName()
+        );
     }
 
     private Product toEntity(ProductRequest request){

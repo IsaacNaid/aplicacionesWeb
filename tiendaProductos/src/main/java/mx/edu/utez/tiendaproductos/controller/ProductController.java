@@ -4,6 +4,8 @@ package mx.edu.utez.tiendaproductos.controller;
 import jakarta.validation.Valid;
 import mx.edu.utez.tiendaproductos.dto.ProductRequest;
 import mx.edu.utez.tiendaproductos.dto.ProductResponse;
+import mx.edu.utez.tiendaproductos.dto.StockRequest;
+import mx.edu.utez.tiendaproductos.exception.ResourceNotFoundException;
 import mx.edu.utez.tiendaproductos.model.Product;
 import mx.edu.utez.tiendaproductos.service.ProductService;
 import org.springframework.http.HttpStatus;
@@ -37,12 +39,11 @@ public class ProductController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ProductResponse> getById(@PathVariable Long id) {
-        Optional<Product> product = service.findById(id);
+        Product product = service.findById(id).orElseThrow(
+                ()->
+                new ResourceNotFoundException("Product not found with id " + id)
 
-        if (product.isPresent()) {
-            return ResponseEntity.ok(toResponse(product.get()));
-        }
-
+        );
         return ResponseEntity.notFound().build();
     }
 
@@ -65,15 +66,12 @@ public class ProductController {
             @PathVariable Long id,
             @Valid @RequestBody ProductRequest product) {
 
-        Optional<Product> optional = service.update(
+        Product optional = service.update(
                 id,
                 toEntity(product),
                 product.categoryId()
         );
 
-        if (optional.isPresent()) {
-            return ResponseEntity.ok(toResponse(optional.get()));
-        }
 
         return ResponseEntity.notFound().build();
     }
@@ -88,6 +86,7 @@ public class ProductController {
 
         return ResponseEntity.notFound().build();
     }
+
 
     private ProductResponse toResponse(Product product) {
         return new ProductResponse(
@@ -107,4 +106,14 @@ public class ProductController {
         product.setStock(request.stock());
         return product;
     }
+    @PatchMapping("/{id}/stock")
+    public ResponseEntity<ProductResponse> updateStock(@PathVariable Long id, @Valid @RequestBody StockRequest stockRequest) {
+       Product productUpdated = service.updateStock(
+                id,
+                stockRequest.cantidad(),
+                stockRequest.operation()
+        );
+       return ResponseEntity.ok(toResponse(productUpdated));
+    }
+
 }

@@ -15,6 +15,7 @@ public record ProductRequest(
         Integer stock,
         @NotNull
         Long categoryId
+
 ) {
 
 

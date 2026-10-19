@@ -1,6 +1,8 @@
 
 package mx.edu.utez.tiendaproductos.service;
 
+import mx.edu.utez.tiendaproductos.exception.InsufficientStockException;
+import mx.edu.utez.tiendaproductos.exception.InvalidOperationException;
 import mx.edu.utez.tiendaproductos.exception.ResourceNotFoundException;
 import mx.edu.utez.tiendaproductos.model.Category;
 import mx.edu.utez.tiendaproductos.model.Product;
@@ -40,7 +42,7 @@ public class ProductService {
         return repo.save(product);
     }
 
-    public Optional<Product> update(long id, Product product, long categoryId) {
+    public Product update(long id, Product product, long categoryId) {
 
         Product productDB = repo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -57,7 +59,7 @@ public class ProductService {
         productDB.setStock(product.getStock());
         productDB.setCategory(category);
 
-        return Optional.of(repo.save(productDB));
+        return repo.save(productDB);
     }
 
     public boolean delete(long id) {
@@ -67,5 +69,24 @@ public class ProductService {
 
         repo.deleteById(id);
         return true;
+    }
+    public Product updateStock(long id, Integer cantidad, String operation) {
+        Product productDB = repo.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Product not found with ID: " + id
+                ));
+        int stockActual = productDB.getStock();
+        if (operation.equals("add")) {
+            productDB.setStock(cantidad + stockActual);
+        }else if (operation.equals("remove")) {
+            if (cantidad > stockActual) {
+                throw new InsufficientStockException("Insufficient stock");
+            }
+            productDB.setStock(stockActual -  cantidad);
+        }else {
+            throw new InvalidOperationException("Invalid operation");
+        }
+        return repo.save(productDB);
+
     }
 }
